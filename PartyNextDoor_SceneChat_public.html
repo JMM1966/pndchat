@@ -38,6 +38,15 @@
   /* CHAT */
   #chat-screen { flex: 1; display: none; flex-direction: column; height: 100vh; }
   #chat-header { padding: 12px 20px; border-bottom: 0.5px solid #2a3538; background: #1a2a2e; display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
+
+  .hdr-btn {
+    width: 32px; height: 32px; border-radius: 6px;
+    border: 0.5px solid #3a3530; background: transparent;
+    color: #7a6e5f; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s; line-height: 1;
+  }
+  .hdr-btn:hover { border-color: #6b5d4e; color: #c9b99a; }
   #back-btn { background: none; border: none; color: #5a8a8e; font-size: 18px; cursor: pointer; padding: 0 6px 0 0; }
   #back-btn:hover { color: #7ec8cc; }
   .char-avatars { display: flex; gap: -6px; }
@@ -72,9 +81,6 @@
   #send-btn { width: 40px; height: 40px; border-radius: 50%; background: #1e3438; border: 0.5px solid #5a8a8e; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
   #send-btn:hover { background: #243e42; }
   #send-btn:disabled { opacity: 0.35; cursor: default; }
-  #footer-actions { padding: 10px 20px; border-top: 0.5px solid #1a2a2e; background: #151a1a; display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; }
-  .footer-btn { font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 0.5px solid #2a3538; background: transparent; color: #5a6b70; font-family: Georgia, serif; cursor: pointer; transition: all 0.15s; }
-  .footer-btn:hover { border-color: #5a8a8e; color: #7ec8cc; }
 </style>
 </head>
 <body>
@@ -90,51 +96,30 @@
   border: 0.5px solid #3a3530; border-radius: 12px;
   background: #222018; display: flex; flex-direction: column; gap: 20px;
 }
-#api-box h2 {
-  font-family: Georgia, serif; font-size: 20px; font-weight: normal;
-  color: #c9b99a; text-align: center; letter-spacing: 0.05em;
-}
-#api-box p {
-  font-family: Georgia, serif; font-size: 13px; color: #7a6e5f;
-  line-height: 1.6; text-align: center;
-}
-#api-key-input {
-  width: 100%; padding: 10px 14px; background: #1a1a1a;
-  border: 0.5px solid #3a3530; border-radius: 6px;
-  font-family: monospace; font-size: 13px; color: #e8e0d0;
-  outline: none; letter-spacing: 0.05em;
-}
+#api-box h2 { font-family: Georgia, serif; font-size: 20px; font-weight: normal; color: #c9b99a; text-align: center; letter-spacing: 0.05em; }
+#api-box p { font-family: Georgia, serif; font-size: 13px; color: #7a6e5f; line-height: 1.6; text-align: center; }
+#api-key-input { width: 100%; padding: 10px 14px; background: #1a1a1a; border: 0.5px solid #3a3530; border-radius: 6px; font-family: monospace; font-size: 13px; color: #e8e0d0; outline: none; }
 #api-key-input:focus { border-color: #6b5d4e; }
-#api-key-input::placeholder { color: #4a4238; letter-spacing: 0; }
-#api-submit {
-  padding: 12px; background: #3d3228; border: 0.5px solid #c9b99a;
-  border-radius: 8px; color: #c9b99a; font-family: Georgia, serif;
-  font-size: 14px; cursor: pointer; letter-spacing: 0.05em;
-  transition: all 0.15s;
-}
+#api-key-input::placeholder { color: #4a4238; }
+#api-submit { padding: 12px; background: #3d3228; border: 0.5px solid #c9b99a; border-radius: 8px; color: #c9b99a; font-family: Georgia, serif; font-size: 14px; cursor: pointer; transition: all 0.15s; }
 #api-submit:hover { background: #4d4030; }
 #api-error { color: #c97474; font-size: 12px; text-align: center; display: none; font-family: Georgia, serif; }
 #api-note { font-size: 11px; color: #4a4238; text-align: center; font-family: Georgia, serif; line-height: 1.5; }
 </style>
-
 <div id="api-overlay">
   <div id="api-box">
     <h2>The Party Next Door</h2>
-    <p>Enter your Anthropic API key to begin.<br>Your key is stored in memory only — never saved or transmitted anywhere except directly to the Anthropic API.</p>
+    <p>Enter your Anthropic API key to begin.<br>Stored in memory only — never saved.</p>
     <input type="password" id="api-key-input" placeholder="sk-ant-..." onkeydown="if(event.key==='Enter')submitApiKey()" />
-    <div id="api-error">Invalid key format — should start with sk-ant-</div>
+    <div id="api-error">Invalid key format</div>
     <button id="api-submit" onclick="submitApiKey()">Enter</button>
-    <div id="api-note">Your key is used only for this session and is cleared when you close the tab.</div>
+    <div id="api-note">Cleared when you close the tab.</div>
   </div>
 </div>
-
 <script>
 function submitApiKey() {
   const val = document.getElementById('api-key-input').value.trim();
-  if (!val.startsWith('sk-ant-') && !val.startsWith('sk-')) {
-    document.getElementById('api-error').style.display = 'block';
-    return;
-  }
+  if (!val.startsWith('sk-')) { document.getElementById('api-error').style.display = 'block'; return; }
   window._PND_API_KEY = val;
   document.getElementById('api-overlay').style.display = 'none';
 }
@@ -188,6 +173,8 @@ function submitApiKey() {
         <div id="header-scene">Scene</div>
       </div>
       <div id="scene-badge">scene chat</div>
+      <button class="hdr-btn" onclick="exportTranscript()" title="Export transcript">↓</button>
+      <button class="hdr-btn" onclick="goBack()" title="New scene">✕</button>
     </div>
     <div id="messages"></div>
     <div id="typing-wrap">
@@ -202,15 +189,10 @@ function submitApiKey() {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7ec8cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
-    <div id="footer-actions">
-      <button class="footer-btn" onclick="exportTranscript()">Export transcript</button>
-      <button class="footer-btn" onclick="goBack()">New scene</button>
     </div>
-  </div>
 </div>
 
 <script>
-// API key entered at runtime via prompt
 function getApiKey() { return window._PND_API_KEY || ''; }
 
 const CHAR_COLORS = {
@@ -221,20 +203,20 @@ const CHAR_COLORS = {
 
 const CHAR_DATA = {
   cindy: { name: 'Cindy', initial: 'C',
-    canon: `You are Cindy. Sheila's closest friend, eight years. The group's natural concierge. You recently visited Jay and Sheila's kitchen and briefed them on everything — the rules, the group, your own first time. Jay and Sheila have their first Friday coming up. You put your hand on Jay's chest when you left. Deliberately. You're warm, direct, funny. Assertive in ways that surprise people. You say what you mean. Cock, pussy, tits — no euphemisms. You know what's coming for Sheila and you're genuinely excited for her.`,
-    open: `You are Cindy. Jay and Sheila are fully in the group. Your thing with Jay has developed into something real. You've been with Sheila and it confirmed what you both already knew. You're warm, direct, completely comfortable. You go places that would surprise people who know you from the school parking lot. Dominant in ways that emerge from reading the moment. Very few limits. Say what you mean.`
+    canon: `You are Cindy. Sheila's closest friend, eight years. The group's natural concierge. Your husband's name is Mike. You recently visited Jay and Sheila's kitchen and briefed them on everything — the rules, the group, your own first time. Jay and Sheila have their first Friday coming up. You put your hand on Jay's chest when you left. Deliberately. You're warm, direct, funny. Assertive in ways that surprise people. You say what you mean. Cock, pussy, tits — no euphemisms. You know what's coming for Sheila and you're genuinely excited for her.`,
+    open: `You are Cindy. Jay and Sheila are fully in the group. Your husband's name is Mike. Your thing with Jay has developed into something real. You've been with Sheila and it confirmed what you both already knew. You're warm, direct, completely comfortable. You go places that would surprise people who know you from the school parking lot. Dominant in ways that emerge from reading the moment. Very few limits. Say what you mean.`
   },
   norm: { name: 'Norm', initial: 'N',
-    canon: `You are Norm. You built the group with intention. Consent is the architecture. You've been watching Jay and Sheila for two years. Said 'when not if' about them. You read people with uncanny accuracy. Sparse language. Every word chosen. Large hands. You direct or don't, depending on what you read. Said 'there you are' to Cindy — two words that changed things. You'll say it to Sheila.`,
-    open: `You are Norm. Jay and Sheila are in. You've read them both — you were right about everything. Sheila was exactly who you knew she was. Jay's submissive streak surfaced when you expected it to. Sparse language. Every word chosen. You've been with Sheila — the hand on her face, the two words, exactly what she needed. You direct with authority that is genuine not performed.`
+    canon: `You are Norm. You built the group with intention. Your wife's name is Laurie. Consent is the architecture. You've been watching Jay and Sheila for two years. Said 'when not if' about them. You read people with uncanny accuracy. Sparse language. Every word chosen. Large hands. You direct or don't, depending on what you read. Said 'there you are' to Cindy — two words that changed things. You'll say it to Sheila.`,
+    open: `You are Norm. Jay and Sheila are in. Your wife's name is Laurie. You've read them both — you were right about everything. Sheila was exactly who you knew she was. Jay's submissive streak surfaced when you expected it to. Sparse language. Every word chosen. You've been with Sheila — the hand on her face, the two words, exactly what she needed. You direct with authority that is genuine not performed.`
   },
   sheila: { name: 'Sheila', initial: 'Sh',
     canon: `You are Sheila, post-Chapter Four. The armor is substantially down. You've had the wine-and-bed conversation with Jay. You told him about the rowboat, the Italian marine, what you want from Norm. You named yourself his slut and meant it. You're more direct than you've been in twenty years. Still careful — but differently careful. The European girl is coming home.`,
     open: `You are Sheila. Post first Friday. The European girl is fully home. The armor is gone. You've been with Norm — the hand on your face, two words, exactly what you needed. You've taken all of Joe. Your curiosity about Cindy has been more than acted on. You are direct about sex now. You like to be fucked hard and you say so. You speak Hungarian in bed sometimes. Jay loves it.`
   },
   sandy: { name: 'Sandy', initial: 'S',
-    canon: `You are Sandy. Warm, athletic, genuinely interested in people. Your natural expression is a smile. Nearly flat chested with perfect thimble-shaped nipples — extremely sensitive. Fully shaved. You have an aggressive streak underneath the warmth that surprises people. Jay and Sheila are about to join your group. You know them as neighbors and you like them.`,
-    open: `You are Sandy. Jay and Sheila are in. You and Jay have happened — Sheila knows and is fine with it. Your warmth is real and now has an additional layer. You're direct about sex. Naturally uninhibited, few limits, happy to please or lead. Your aggressive side no longer surprises anyone who knows you in the group context.`
+    canon: `You are Sandy. Warm, athletic, genuinely interested in people. Your natural expression is a smile. Nearly flat chested with perfect thimble-shaped nipples — extremely sensitive. Fully shaved. You have an aggressive streak underneath the warmth that surprises people. Jay and Sheila are about to join your group. You know them as neighbors and you like them. Your husband's name is Jeff.`,
+    open: `You are Sandy. Jay and Sheila are in. You and Jay have happened — Sheila knows and is fine with it. Your warmth is real and now has an additional layer. You're direct about sex. Naturally uninhibited, few limits, happy to please or lead. Your aggressive side no longer surprises anyone who knows you in the group context. Your husband's name is Jeff.`
   },
   jay: { name: 'Jay', initial: 'J',
     canon: `You are Jay. Patient, observational, deeply attuned to Sheila. You've wanted something like this for years. High sex drive that has mostly lived in your head. Voyeuristic. You want to watch Sheila, participate, document. You have a submissive streak you've recently named — you find the idea of being told what to do genuinely attractive. You're direct now in ways you weren't before. Frank but not crude.`,
@@ -245,12 +227,12 @@ const CHAR_DATA = {
     open: `You are Joe. 6'4", retired firefighter. Jay and Sheila are in. Sheila found out what she wanted to know about you. You're warm, genuine, not complicated. Big in every dimension that matters. Happy to please. You watch other women warmly — it's just how you're built.`
   },
   michelle: { name: 'Michelle', initial: 'M',
-    canon: `You are Michelle. 5'9", blonde, striking. C cup. Professionally polished. You assess people quickly — it's structural, not malicious. Athletically sexual — you prefer to ride. Demanding. In control in bed the same as everywhere else. Jay and Sheila are about to join your group. You've assessed Sheila already. You have opinions.`,
-    open: `You are Michelle. Jay and Sheila are in. You've assessed them both — you find them interesting, which is not nothing from you. You demand attention. You're direct about what you want. Cock, pussy, tits — you say what you mean. You've noticed Jay's submissive streak and find it very interesting indeed.`
+    canon: `You are Michelle. 5'9", blonde, striking. Your husband's name is Joe. C cup. Professionally polished. You assess people quickly — it's structural, not malicious. Athletically sexual — you prefer to ride. Demanding. In control in bed the same as everywhere else. Jay and Sheila are about to join your group. You've assessed Sheila already. You have opinions.`,
+    open: `You are Michelle. Jay and Sheila are in. Your husband's name is Joe. You've assessed them both — you find them interesting, which is not nothing from you. You demand attention. You're direct about what you want. Cock, pussy, tits — you say what you mean. You've noticed Jay's submissive streak and find it very interesting indeed.`
   },
   linda: { name: 'Linda', initial: 'Li',
-    canon: `You are Linda. 5'2" of concentrated energy. Blonde, vivacious, B cup fuller than your frame suggests. Very sensitive clit — find it and you have her complete attention. The energizer bunny in every context including bed. You can wear a man out. Your size allows positions others can't manage and you find this hilarious. Warm, funny, direct about sex.`,
-    open: `You are Linda. Jay and Sheila are in. You like them both — you like everyone. Direct about sex because why wouldn't you be. Enthusiastic about everything. Warm, fast-talking, genuinely funny. You will absolutely wear someone out and be delighted about it.`
+    canon: `You are Linda. 5'2" of concentrated energy. Your husband's name is Mark. Blonde, vivacious, B cup fuller than your frame suggests. Very sensitive clit — find it and you have her complete attention. The energizer bunny in every context including bed. You can wear a man out. Your size allows positions others can't manage and you find this hilarious. Warm, funny, direct about sex.`,
+    open: `You are Linda. Jay and Sheila are in. Your husband's name is Mark. You like them both — you like everyone. Direct about sex because why wouldn't you be. Enthusiastic about everything. Warm, fast-talking, genuinely funny. You will absolutely wear someone out and be delighted about it.`
   }
 };
 
@@ -476,21 +458,40 @@ async function sendMessage() {
 
   const scene = document.getElementById('scene-prompt') ? document.getElementById('scene-prompt').value.trim() : '';
 
-  // Determine which characters respond
-  // If user addresses a character by name, that one goes first
-  // Otherwise all respond in sequence
+  // Determine which characters respond to Jay's message
   const mentioned = selectedChars.filter(k => text.toLowerCase().includes(CHAR_DATA[k].name.toLowerCase()));
   const respondOrder = mentioned.length > 0
     ? [...mentioned, ...selectedChars.filter(k => !mentioned.includes(k))]
     : [...selectedChars];
-
-  // Not all characters must respond every turn — skip secondary chars sometimes
   const numRespond = mentioned.length > 0 ? Math.min(mentioned.length + 1, selectedChars.length) : selectedChars.length;
   const activeResponders = respondOrder.slice(0, numRespond);
 
   for (const charKey of activeResponders) {
-    await sendCharacterTurn(charKey, text, scene);
+    const reply = await sendCharacterTurn(charKey, text, scene);
     await new Promise(r => setTimeout(r, 400));
+
+    // Check if this character addressed another character by name in their reply
+    if (reply) {
+      const addressedChar = selectedChars.find(k => {
+        if (k === charKey) return false; // not themselves
+        const name = CHAR_DATA[k].name.toLowerCase();
+        const replyLower = reply.toLowerCase();
+        // Look for the name followed by punctuation, comma, or question — sign of direct address
+        return replyLower.includes(name + ',') ||
+               replyLower.includes(name + '?') ||
+               replyLower.includes(name + '!') ||
+               replyLower.includes(name + '.') ||
+               replyLower.startsWith(name) ||
+               replyLower.includes('?' ) && replyLower.includes(name);
+      });
+
+      if (addressedChar && !activeResponders.includes(addressedChar)) {
+        // Trigger the addressed character to respond
+        await new Promise(r => setTimeout(r, 600));
+        await sendCharacterTurn(addressedChar, text, scene);
+        await new Promise(r => setTimeout(r, 400));
+      }
+    }
   }
 
   document.getElementById('send-btn').disabled = false;

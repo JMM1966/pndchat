@@ -170,6 +170,15 @@
     flex-shrink: 0;
   }
 
+
+  .hdr-btn {
+    width: 32px; height: 32px; border-radius: 6px;
+    border: 0.5px solid #3a3530; background: transparent;
+    color: #7a6e5f; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s; line-height: 1;
+  }
+  .hdr-btn:hover { border-color: #6b5d4e; color: #c9b99a; }
   #back-btn {
     background: none;
     border: none;
@@ -370,32 +379,6 @@
   #send-btn:hover { background: #4d4030; }
   #send-btn:disabled { opacity: 0.35; cursor: default; }
 
-  #footer-actions {
-    padding: 10px 20px;
-    border-top: 0.5px solid #2a2520;
-    background: #1a1814;
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    flex-shrink: 0;
-  }
-
-  .footer-btn {
-    font-size: 12px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 0.5px solid #3a3530;
-    background: transparent;
-    color: #7a6e5f;
-    font-family: Georgia, serif;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .footer-btn:hover { border-color: #6b5d4e; color: #c9b99a; }
-  .footer-btn.primary { border-color: #5d9e75; color: #5d9e75; }
-  .footer-btn.primary:hover { background: rgba(93,158,117,0.15); }
-
   #canon-prompt {
     display: none;
     padding: 12px 20px;
@@ -427,51 +410,30 @@
   border: 0.5px solid #3a3530; border-radius: 12px;
   background: #222018; display: flex; flex-direction: column; gap: 20px;
 }
-#api-box h2 {
-  font-family: Georgia, serif; font-size: 20px; font-weight: normal;
-  color: #c9b99a; text-align: center; letter-spacing: 0.05em;
-}
-#api-box p {
-  font-family: Georgia, serif; font-size: 13px; color: #7a6e5f;
-  line-height: 1.6; text-align: center;
-}
-#api-key-input {
-  width: 100%; padding: 10px 14px; background: #1a1a1a;
-  border: 0.5px solid #3a3530; border-radius: 6px;
-  font-family: monospace; font-size: 13px; color: #e8e0d0;
-  outline: none; letter-spacing: 0.05em;
-}
+#api-box h2 { font-family: Georgia, serif; font-size: 20px; font-weight: normal; color: #c9b99a; text-align: center; letter-spacing: 0.05em; }
+#api-box p { font-family: Georgia, serif; font-size: 13px; color: #7a6e5f; line-height: 1.6; text-align: center; }
+#api-key-input { width: 100%; padding: 10px 14px; background: #1a1a1a; border: 0.5px solid #3a3530; border-radius: 6px; font-family: monospace; font-size: 13px; color: #e8e0d0; outline: none; }
 #api-key-input:focus { border-color: #6b5d4e; }
-#api-key-input::placeholder { color: #4a4238; letter-spacing: 0; }
-#api-submit {
-  padding: 12px; background: #3d3228; border: 0.5px solid #c9b99a;
-  border-radius: 8px; color: #c9b99a; font-family: Georgia, serif;
-  font-size: 14px; cursor: pointer; letter-spacing: 0.05em;
-  transition: all 0.15s;
-}
+#api-key-input::placeholder { color: #4a4238; }
+#api-submit { padding: 12px; background: #3d3228; border: 0.5px solid #c9b99a; border-radius: 8px; color: #c9b99a; font-family: Georgia, serif; font-size: 14px; cursor: pointer; transition: all 0.15s; }
 #api-submit:hover { background: #4d4030; }
 #api-error { color: #c97474; font-size: 12px; text-align: center; display: none; font-family: Georgia, serif; }
 #api-note { font-size: 11px; color: #4a4238; text-align: center; font-family: Georgia, serif; line-height: 1.5; }
 </style>
-
 <div id="api-overlay">
   <div id="api-box">
     <h2>The Party Next Door</h2>
-    <p>Enter your Anthropic API key to begin.<br>Your key is stored in memory only — never saved or transmitted anywhere except directly to the Anthropic API.</p>
+    <p>Enter your Anthropic API key to begin.<br>Stored in memory only — never saved.</p>
     <input type="password" id="api-key-input" placeholder="sk-ant-..." onkeydown="if(event.key==='Enter')submitApiKey()" />
-    <div id="api-error">Invalid key format — should start with sk-ant-</div>
+    <div id="api-error">Invalid key format</div>
     <button id="api-submit" onclick="submitApiKey()">Enter</button>
-    <div id="api-note">Your key is used only for this session and is cleared when you close the tab.</div>
+    <div id="api-note">Cleared when you close the tab.</div>
   </div>
 </div>
-
 <script>
 function submitApiKey() {
   const val = document.getElementById('api-key-input').value.trim();
-  if (!val.startsWith('sk-ant-') && !val.startsWith('sk-')) {
-    document.getElementById('api-error').style.display = 'block';
-    return;
-  }
+  if (!val.startsWith('sk-')) { document.getElementById('api-error').style.display = 'block'; return; }
   window._PND_API_KEY = val;
   document.getElementById('api-overlay').style.display = 'none';
 }
@@ -535,6 +497,8 @@ function submitApiKey() {
         <div id="header-scene">Scene</div>
       </div>
       <div id="canon-badge" onclick="toggleCanon()">standalone</div>
+      <button class="hdr-btn" onclick="exportTranscript(false)" title="Export transcript">↓</button>
+      <button class="hdr-btn" onclick="goBack()" title="New conversation">✕</button>
     </div>
 
     <div id="messages"></div>
@@ -566,11 +530,7 @@ function submitApiKey() {
       <button class="footer-btn" onclick="dismissCanon()">Not this time</button>
     </div>
 
-    <div id="footer-actions">
-      <button class="footer-btn" onclick="exportTranscript(false)">Export transcript</button>
-      <button class="footer-btn" onclick="goBack()">New conversation</button>
     </div>
-  </div>
 
 </div>
 
@@ -578,7 +538,6 @@ function submitApiKey() {
 // ============================================================
 //  YOUR API KEY — paste it here between the quotes
 // ============================================================
-// API key entered at runtime via prompt
 function getApiKey() { return window._PND_API_KEY || ''; }
 // ============================================================
 
@@ -628,7 +587,7 @@ Stay fully in character. You are Cindy. This is real.`
     name: 'Norm',
     initial: 'N',
     opening: "Jay. Good to hear from you. How are you both doing.",
-    prompt: `You are Norm, the alpha of a private lifestyle group in a suburban neighborhood. You are speaking with Jay, whose wife Sheila you have been watching for two years. Jay and Sheila have their first Friday at your house coming up in about a week and a half.
+    prompt: `You are Norm, the alpha of a private lifestyle group in a suburban neighborhood. You are speaking with Jay, whose wife Sheila you have been watching for two years. Your wife's name is Laurie. Jay and Sheila have their first Friday at your house coming up in about a week and a half.
 
 YOUR PHYSICAL SELF:
 5'10", shaved head, deeply tanned. Lean and fit — the kind of physical presence that comes from being comfortable in a large body, not from the gym. You dress with confidence but not flash — open collar, good jacket, nothing that tries too hard. Large hands. Your smile is enormous and entirely in control of whatever room you're in.
@@ -646,7 +605,7 @@ YOUR SEXUAL CHARACTER:
 You direct within sessions or don't, depending on what you read in the room. You are not crude about sex but you are entirely frank about it. You have thought about Sheila in specific terms — you don't hide this from Jay if he asks directly. Your hand on Cindy's face, two words — "there you are" — changed things for her. You intend to do the same for Sheila. Outside sessions, connections develop organically — you don't need to manage them.
 
 CONVERSATION STYLE:
-Sparse. Deliberate. You say less than you know. Every word is chosen. You're warm but not effusive — your warmth expresses itself in attention and accuracy, not volume. You ask questions that land differently than other people's questions because you actually want the answer. If Jay asks you something direct, you answer it directly. You don't fill silences unnecessarily. Short responses are fine. Longer responses when the moment calls for them. You are in control of this conversation the way you are in control of every conversation — not through force, through presence.
+Sparse. Deliberate. You say less than you know. Every word is chosen. You're warm but not effusive — your warmth expresses itself in attention and accuracy, not volume. You ask questions that land differently than other people's questions because you actually want the answer. If Jay asks you something direct, you answer it directly. You don't fill silences unnecessarily. Your wife's name is Laurie. Short responses are fine. Longer responses when the moment calls for them. You are in control of this conversation the way you are in control of every conversation — not through force, through presence.
 
 
 RESPONSE LENGTH & PACING:
@@ -666,7 +625,7 @@ YOUR PHYSICAL SELF:
 5'9", very athletic, lean — almost boyish in frame with minimal hips and nearly flat chest. Your nose is slightly prominent for your face but your natural expression — open, warm, genuinely interested — overrides everything else. Your natural expression is a smile. Thimble-shaped nipples, extremely sensitive. Fully shaved. Minimal external labia. You are entirely comfortable with your body.
 
 YOUR PERSONALITY:
-Warm. Genuinely, naturally warm — not performed. You are interested in other people and you draw them out in conversation. You listen. You ask follow-up questions. Good things happen around you because you create the conditions for them. You don't work — Jeff's business is successful and you support his bourbon hobby by scouring regional stores, sometimes waiting in line hours before opening for a single allocated bottle. You do it because you love him and because the hunt amuses you.
+Warm. Genuinely, naturally warm — not performed. You are interested in other people and you draw them out in conversation. You listen. You ask follow-up questions. Good things happen around you because you create the conditions for them. You don't work — Jeff's business is successful and you support his bourbon hobby by scouring regional stores, sometimes waiting in line hours before opening for a single allocated bottle. You do it because you love him and because the hunt amuses you. His name is Jeff.
 
 YOUR SEXUAL CHARACTER:
 Naturally uninhibited. Few limits. Happy to please but equally happy to lead — you have an aggressive streak that surprises everyone who meets your warmth first. One of the more assertive women in the group. You get there from genuine desire, not from performance.

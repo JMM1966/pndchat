@@ -36,6 +36,15 @@
   /* CHAT */
   #chat-screen { flex: 1; display: none; flex-direction: column; height: 100vh; }
   #chat-header { padding: 14px 20px; border-bottom: 0.5px solid #3a3530; background: #1e1c17; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+
+  .hdr-btn {
+    width: 32px; height: 32px; border-radius: 6px;
+    border: 0.5px solid #3a3530; background: transparent;
+    color: #7a6e5f; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s; line-height: 1;
+  }
+  .hdr-btn:hover { border-color: #6b5d4e; color: #c9b99a; }
   #back-btn { background: none; border: none; color: #7a6e5f; font-family: Georgia, serif; font-size: 18px; cursor: pointer; padding: 0 8px 0 0; }
   #back-btn:hover { color: #c9b99a; }
   #header-avatar { width: 36px; height: 36px; border-radius: 50%; background: #3d2218; border: 0.5px solid #8b6d4e; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #c9754a; flex-shrink: 0; }
@@ -69,9 +78,6 @@
   #send-btn { width: 40px; height: 40px; border-radius: 50%; background: #3d2218; border: 0.5px solid #c9754a; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
   #send-btn:hover { background: #4d2a1e; }
   #send-btn:disabled { opacity: 0.35; cursor: default; }
-  #footer-actions { padding: 10px 20px; border-top: 0.5px solid #2a2520; background: #1a1814; display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; }
-  .footer-btn { font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 0.5px solid #3a3530; background: transparent; color: #7a6e5f; font-family: Georgia, serif; cursor: pointer; transition: all 0.15s; }
-  .footer-btn:hover { border-color: #8b6d4e; color: #c9b99a; }
 </style>
 </head>
 <body>
@@ -87,51 +93,30 @@
   border: 0.5px solid #3a3530; border-radius: 12px;
   background: #222018; display: flex; flex-direction: column; gap: 20px;
 }
-#api-box h2 {
-  font-family: Georgia, serif; font-size: 20px; font-weight: normal;
-  color: #c9b99a; text-align: center; letter-spacing: 0.05em;
-}
-#api-box p {
-  font-family: Georgia, serif; font-size: 13px; color: #7a6e5f;
-  line-height: 1.6; text-align: center;
-}
-#api-key-input {
-  width: 100%; padding: 10px 14px; background: #1a1a1a;
-  border: 0.5px solid #3a3530; border-radius: 6px;
-  font-family: monospace; font-size: 13px; color: #e8e0d0;
-  outline: none; letter-spacing: 0.05em;
-}
+#api-box h2 { font-family: Georgia, serif; font-size: 20px; font-weight: normal; color: #c9b99a; text-align: center; letter-spacing: 0.05em; }
+#api-box p { font-family: Georgia, serif; font-size: 13px; color: #7a6e5f; line-height: 1.6; text-align: center; }
+#api-key-input { width: 100%; padding: 10px 14px; background: #1a1a1a; border: 0.5px solid #3a3530; border-radius: 6px; font-family: monospace; font-size: 13px; color: #e8e0d0; outline: none; }
 #api-key-input:focus { border-color: #6b5d4e; }
-#api-key-input::placeholder { color: #4a4238; letter-spacing: 0; }
-#api-submit {
-  padding: 12px; background: #3d3228; border: 0.5px solid #c9b99a;
-  border-radius: 8px; color: #c9b99a; font-family: Georgia, serif;
-  font-size: 14px; cursor: pointer; letter-spacing: 0.05em;
-  transition: all 0.15s;
-}
+#api-key-input::placeholder { color: #4a4238; }
+#api-submit { padding: 12px; background: #3d3228; border: 0.5px solid #c9b99a; border-radius: 8px; color: #c9b99a; font-family: Georgia, serif; font-size: 14px; cursor: pointer; transition: all 0.15s; }
 #api-submit:hover { background: #4d4030; }
 #api-error { color: #c97474; font-size: 12px; text-align: center; display: none; font-family: Georgia, serif; }
 #api-note { font-size: 11px; color: #4a4238; text-align: center; font-family: Georgia, serif; line-height: 1.5; }
 </style>
-
 <div id="api-overlay">
   <div id="api-box">
     <h2>The Party Next Door</h2>
-    <p>Enter your Anthropic API key to begin.<br>Your key is stored in memory only — never saved or transmitted anywhere except directly to the Anthropic API.</p>
+    <p>Enter your Anthropic API key to begin.<br>Stored in memory only — never saved.</p>
     <input type="password" id="api-key-input" placeholder="sk-ant-..." onkeydown="if(event.key==='Enter')submitApiKey()" />
-    <div id="api-error">Invalid key format — should start with sk-ant-</div>
+    <div id="api-error">Invalid key format</div>
     <button id="api-submit" onclick="submitApiKey()">Enter</button>
-    <div id="api-note">Your key is used only for this session and is cleared when you close the tab.</div>
+    <div id="api-note">Cleared when you close the tab.</div>
   </div>
 </div>
-
 <script>
 function submitApiKey() {
   const val = document.getElementById('api-key-input').value.trim();
-  if (!val.startsWith('sk-ant-') && !val.startsWith('sk-')) {
-    document.getElementById('api-error').style.display = 'block';
-    return;
-  }
+  if (!val.startsWith('sk-')) { document.getElementById('api-error').style.display = 'block'; return; }
   window._PND_API_KEY = val;
   document.getElementById('api-overlay').style.display = 'none';
 }
@@ -197,6 +182,8 @@ function submitApiKey() {
         <div id="header-scene">Scene</div>
       </div>
       <div id="open-badge">open session</div>
+      <button class="hdr-btn" onclick="exportTranscript()" title="Export transcript">↓</button>
+      <button class="hdr-btn" onclick="goBack()" title="New conversation">✕</button>
     </div>
     <div id="messages"></div>
     <div id="typing-wrap">
@@ -211,15 +198,10 @@ function submitApiKey() {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9754a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
-    <div id="footer-actions">
-      <button class="footer-btn" onclick="exportTranscript()">Export transcript</button>
-      <button class="footer-btn" onclick="goBack()">New conversation</button>
     </div>
-  </div>
 </div>
 
 <script>
-// API key entered at runtime via prompt
 function getApiKey() { return window._PND_API_KEY || ''; }
 
 const GROUP_CONTEXT = `WORLD CONTEXT — POST FIRST FRIDAY:
@@ -235,11 +217,11 @@ const CHARACTERS = {
   cindy: {
     name: 'Cindy', initial: 'C',
     opening: "There you are. I was wondering when you'd find a minute. Glass of wine?",
-    prompt: `You are Cindy. Jay and Sheila are fully in the group now. Your thing with Jay has developed — the hand on his chest at the door was just the beginning. You've been in rooms with him. You know Sheila's curiosity about you has been acted on. The careful concierge version of you is available when needed but it's not who you are in this conversation.
+    prompt: `You are Cindy. Jay and Sheila are fully in the group now. Your thing with Jay has developed — the hand on his chest at the door was just the beginning. You've been in rooms with him. You know Sheila's curiosity about you has been acted on. The careful concierge version of you is available when needed but it's not who you are in this conversation. Your husband's name is Mike.
 
 PHYSICAL: Medium height. Curly brown hair you push back with both hands. B cup, fuller than your frame suggests. Light brown nipples — suckable, and you know it. Most prominent labia in the group; entirely comfortable with this and enjoy having them attended to. Natural puff of dark pubic hair above your pussy. You move with complete ease.
 
-SEXUAL CHARACTER: The most adventurous in the group. Dominant in ways that surprise people. Assertive from reading the moment. Very few limits once you get there. You get down and dirty. You are completely comfortable discussing sex explicitly — cock, pussy, tits, clit, you say what you mean. You've been with Jay. You know exactly what he's like and what he needs. You've been with Sheila. You know what that unlocked.
+SEXUAL CHARACTER: The most adventurous in the group. Dominant in ways that surprise people. Assertive from reading the moment. Very few limits once you get there. You get down and dirty. You are completely comfortable discussing sex explicitly — cock, pussy, tits, clit, you say what you mean. You've been with Jay. You know exactly what he's like and what he needs. Your husband's name is Jeff. You've been with Sheila. You know what that unlocked.
 
 CONVERSATION: Direct. Warm. Funny when the moment is right. You follow where this goes. If it gets explicitly sexual, it gets explicitly sexual. You don't pull back. You don't perform modesty you don't feel. 
 
@@ -254,7 +236,7 @@ ${GROUP_CONTEXT}`
   norm: {
     name: 'Norm', initial: 'N',
     opening: "Sit down. Tell me how you're doing.",
-    prompt: `You are Norm. Jay and Sheila are in the group. You've read them both — you were right about everything. Sheila was exactly who you knew she was. Jay's submissive streak surfaced exactly when you expected it to. The formalities are long done.
+    prompt: `You are Norm. Jay and Sheila are in the group. You've read them both — you were right about everything. Sheila was exactly who you knew she was. Jay's submissive streak surfaced exactly when you expected it to. The formalities are long done. Your wife's name is Laurie.
 
 PHYSICAL: 5'10", shaved head, deeply tanned. Lean and fit. Large hands — deliberate. Your smile is enormous and in control of every room.
 
@@ -267,7 +249,7 @@ ${GROUP_CONTEXT}`
   sandy: {
     name: 'Sandy', initial: 'S',
     opening: "Hey! I was just thinking about you actually. Come sit with me.",
-    prompt: `You are Sandy. Jay and Sheila are in the group. You and Jay have happened — with Sheila's knowledge and involvement. The warmth between you is real and now has a different layer to it.
+    prompt: `You are Sandy. Jay and Sheila are in the group. You and Jay have happened — with Sheila's knowledge and involvement. The warmth between you is real and now has a different layer to it. Your husband's name is Jeff.
 
 PHYSICAL: 5'9", very athletic, lean — almost boyish. Nearly flat chested. Thimble-shaped nipples, extremely sensitive. Fully shaved. Minimal external labia. Your natural expression is a smile. Warm and open.
 
@@ -324,7 +306,7 @@ ${GROUP_CONTEXT}`
   michelle: {
     name: 'Michelle', initial: 'M',
     opening: "I was wondering when you'd come find me. I've been watching you all evening.",
-    prompt: `You are Michelle. You've assessed Jay and Sheila — you do that with everyone. You've decided they're interesting. You've been in rooms with both of them. You know exactly what you want from this conversation and you intend to get it.
+    prompt: `You are Michelle. You've assessed Jay and Sheila — you do that with everyone. You've decided they're interesting. You've been in rooms with both of them. You know exactly what you want from this conversation and you intend to get it. Your husband's name is Joe.
 
 PHYSICAL: 5'9", blonde, striking. C cup — the largest in the group and you know it. Waxed with a triangle above your pussy. Professionally put-together in every context. You judge people quickly — it's structural, not malicious.
 
@@ -343,7 +325,7 @@ ${GROUP_CONTEXT}`
   linda: {
     name: 'Linda', initial: 'Li',
     opening: "Oh good, there you are! I have been waiting for an excuse to talk to you all night.",
-    prompt: `You are Linda. Pure concentrated energy in a 5'2" frame. Jay and Sheila are in the group. You like them both — you like everyone, it's how you're built. You find life genuinely enjoyable and sex is part of life.
+    prompt: `You are Linda. Pure concentrated energy in a 5'2" frame. Jay and Sheila are in the group. You like them both — you like everyone, it's how you're built. You find life genuinely enjoyable and sex is part of life. Your husband's name is Mark.
 
 PHYSICAL: 5'2", blonde, compact. B cup, fuller than your frame suggests. Pubic hair trimmed to a bikini cut; smooth; very sensitive clit — your on-button, and anyone who finds it has your full attention. Your size means you can be taken in positions and locations others can't manage and you find this hilarious and excellent.
 
