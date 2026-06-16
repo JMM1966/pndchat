@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Party Next Door — Character Chat</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #1a1a1a;
+    color: #e8e0d0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #app {
+    max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  /* --- SETUP SCREEN --- */
+  #setup-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 32px;
+    gap: 28px;
+  }
+
+  #setup-screen h1 {
+    font-size: 26px;
+    font-weight: normal;
+    letter-spacing: 0.05em;
+    color: #c9b99a;
+    text-align: center;
+  }
+
+  #setup-screen h2 {
+    font-size: 13px;
+    font-weight: normal;
+    letter-spacing: 0.15em;
+    color: #7a6e5f;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .setup-section { display: flex; flex-direction: column; gap: 10px; }
+
+  .setup-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7a6e5f;
+  }
+
+  .character-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .char-card {
+    border: 0.5px solid #3a3530;
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: #222018;
+  }
+
+  .char-card:hover { border-color: #6b5d4e; background: #2a261e; }
+
+  .char-card.selected {
+    border-color: #c9b99a;
+    background: #2a261e;
+  }
+
+  .char-name {
+    font-size: 16px;
+    color: #e8e0d0;
+    margin-bottom: 4px;
+  }
+
+  .char-desc {
+    font-size: 12px;
+    color: #7a6e5f;
+    line-height: 1.5;
+  }
+
+  .session-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .session-btn {
+    flex: 1;
+    padding: 10px;
+    border: 0.5px solid #3a3530;
+    border-radius: 6px;
+    background: #222018;
+    color: #7a6e5f;
+    font-family: Georgia, serif;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .session-btn:hover { border-color: #6b5d4e; color: #c9b99a; }
+  .session-btn.selected { border-color: #c9b99a; color: #c9b99a; background: #2a261e; }
+
+  #scene-prompt {
+    width: 100%;
+    background: #222018;
+    border: 0.5px solid #3a3530;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    color: #e8e0d0;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+  }
+
+  #scene-prompt:focus { border-color: #6b5d4e; }
+  #scene-prompt::placeholder { color: #4a4238; }
+
+  #start-btn {
+    padding: 14px;
+    background: #3d3228;
+    border: 0.5px solid #c9b99a;
+    border-radius: 8px;
+    color: #c9b99a;
+    font-family: Georgia, serif;
+    font-size: 15px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.15s;
+  }
+
+  #start-btn:hover { background: #4d4030; }
+  #start-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* --- CHAT SCREEN --- */
+  #chat-screen {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  #chat-header {
+    padding: 14px 20px;
+    border-bottom: 0.5px solid #3a3530;
+    background: #1e1c17;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  #back-btn {
+    background: none;
+    border: none;
+    color: #7a6e5f;
+    font-family: Georgia, serif;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 8px 0 0;
+    line-height: 1;
+  }
+
+  #back-btn:hover { color: #c9b99a; }
+
+  #header-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #3d3228;
+    border: 0.5px solid #6b5d4e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #c9b99a;
+    flex-shrink: 0;
+  }
+
+  #header-info { flex: 1; }
+  #header-name { font-size: 15px; color: #e8e0d0; }
+  #header-scene { font-size: 12px; color: #7a6e5f; margin-top: 2px; line-height: 1.4; }
+
+  #canon-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 0.5px solid #3a3530;
+    color: #7a6e5f;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.15s;
+  }
+
+  #canon-badge.canon {
+    border-color: #5d9e75;
+    color: #5d9e75;
+    background: rgba(93,158,117,0.1);
+  }
+
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .msg { display: flex; gap: 10px; max-width: 82%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg.character { align-self: flex-start; }
+
+  .msg-av {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .character .msg-av { background: #3d3228; color: #c9b99a; border: 0.5px solid #6b5d4e; }
+  .user .msg-av { background: #2a2a22; color: #7a6e5f; border: 0.5px solid #3a3530; }
+
+  .bubble {
+    padding: 11px 15px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .character .bubble {
+    background: #222018;
+    border: 0.5px solid #3a3530;
+    border-radius: 4px 14px 14px 14px;
+    color: #e8e0d0;
+  }
+
+  .user .bubble {
+    background: #2d2620;
+    border: 0.5px solid #6b5d4e;
+    border-radius: 14px 14px 4px 14px;
+    color: #c9b99a;
+  }
+
+  .scene-note {
+    align-self: center;
+    font-size: 12px;
+    color: #4a4238;
+    font-style: italic;
+    padding: 4px 12px;
+    border: 0.5px solid #2a2520;
+    border-radius: 20px;
+    background: #1e1c17;
+  }
+
+  #typing-wrap {
+    display: none;
+    padding: 0 20px 6px;
+    align-self: flex-start;
+  }
+
+  #typing-inner { display: flex; gap: 10px; }
+
+  #typing-av {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #3d3228;
+    border: 0.5px solid #6b5d4e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #c9b99a;
+    flex-shrink: 0;
+  }
+
+  #typing-bubble {
+    padding: 13px 16px;
+    background: #222018;
+    border: 0.5px solid #3a3530;
+    border-radius: 4px 14px 14px 14px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6b5d4e;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse {
+    0%,80%,100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1.1); }
+  }
+
+  #input-area {
+    padding: 14px 20px;
+    border-top: 0.5px solid #3a3530;
+    background: #1e1c17;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  #user-input {
+    flex: 1;
+    background: #222018;
+    border: 0.5px solid #3a3530;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    color: #e8e0d0;
+    line-height: 1.5;
+    resize: none;
+    min-height: 40px;
+    max-height: 120px;
+    outline: none;
+  }
+
+  #user-input:focus { border-color: #6b5d4e; }
+  #user-input::placeholder { color: #4a4238; }
+
+  #send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #3d3228;
+    border: 0.5px solid #c9b99a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  #send-btn:hover { background: #4d4030; }
+  #send-btn:disabled { opacity: 0.35; cursor: default; }
+
+  #footer-actions {
+    padding: 10px 20px;
+    border-top: 0.5px solid #2a2520;
+    background: #1a1814;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-shrink: 0;
+  }
+
+  .footer-btn {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 0.5px solid #3a3530;
+    background: transparent;
+    color: #7a6e5f;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .footer-btn:hover { border-color: #6b5d4e; color: #c9b99a; }
+  .footer-btn.primary { border-color: #5d9e75; color: #5d9e75; }
+  .footer-btn.primary:hover { background: rgba(93,158,117,0.15); }
+
+  #canon-prompt {
+    display: none;
+    padding: 12px 20px;
+    border-top: 0.5px solid #3a3530;
+    background: rgba(93,158,117,0.08);
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  #canon-prompt p {
+    flex: 1;
+    font-size: 13px;
+    color: #5d9e75;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<style>
+#api-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: #1a1a1a; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+#api-box {
+  max-width: 440px; width: 90%; padding: 40px 36px;
+  border: 0.5px solid #3a3530; border-radius: 12px;
+  background: #222018; display: flex; flex-direction: column; gap: 20px;
+}
+#api-box h2 {
+  font-family: Georgia, serif; font-size: 20px; font-weight: normal;
+  color: #c9b99a; text-align: center; letter-spacing: 0.05em;
+}
+#api-box p {
+  font-family: Georgia, serif; font-size: 13px; color: #7a6e5f;
+  line-height: 1.6; text-align: center;
+}
+#api-key-input {
+  width: 100%; padding: 10px 14px; background: #1a1a1a;
+  border: 0.5px solid #3a3530; border-radius: 6px;
+  font-family: monospace; font-size: 13px; color: #e8e0d0;
+  outline: none; letter-spacing: 0.05em;
+}
+#api-key-input:focus { border-color: #6b5d4e; }
+#api-key-input::placeholder { color: #4a4238; letter-spacing: 0; }
+#api-submit {
+  padding: 12px; background: #3d3228; border: 0.5px solid #c9b99a;
+  border-radius: 8px; color: #c9b99a; font-family: Georgia, serif;
+  font-size: 14px; cursor: pointer; letter-spacing: 0.05em;
+  transition: all 0.15s;
+}
+#api-submit:hover { background: #4d4030; }
+#api-error { color: #c97474; font-size: 12px; text-align: center; display: none; font-family: Georgia, serif; }
+#api-note { font-size: 11px; color: #4a4238; text-align: center; font-family: Georgia, serif; line-height: 1.5; }
+</style>
+
+<div id="api-overlay">
+  <div id="api-box">
+    <h2>The Party Next Door</h2>
+    <p>Enter your Anthropic API key to begin.<br>Your key is stored in memory only — never saved or transmitted anywhere except directly to the Anthropic API.</p>
+    <input type="password" id="api-key-input" placeholder="sk-ant-..." onkeydown="if(event.key==='Enter')submitApiKey()" />
+    <div id="api-error">Invalid key format — should start with sk-ant-</div>
+    <button id="api-submit" onclick="submitApiKey()">Enter</button>
+    <div id="api-note">Your key is used only for this session and is cleared when you close the tab.</div>
+  </div>
+</div>
+
+<script>
+function submitApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant-') && !val.startsWith('sk-')) {
+    document.getElementById('api-error').style.display = 'block';
+    return;
+  }
+  window._PND_API_KEY = val;
+  document.getElementById('api-overlay').style.display = 'none';
+}
+</script>
+
+
+<div id="app">
+
+  <!-- SETUP SCREEN -->
+  <div id="setup-screen">
+    <div>
+      <h2>The Party Next Door</h2>
+      <h1>Character Conversations</h1>
+    </div>
+
+    <div class="setup-section">
+      <div class="setup-label">Choose a character</div>
+      <div class="character-grid">
+        <div class="char-card" onclick="selectChar('cindy')" id="card-cindy">
+          <div class="char-name">Cindy</div>
+          <div class="char-desc">Sheila's closest friend. Warm, direct, the group's concierge. Assertive in ways that surprise people.</div>
+        </div>
+        <div class="char-card" onclick="selectChar('norm')" id="card-norm">
+          <div class="char-name">Norm</div>
+          <div class="char-desc">The alpha. Reads you immediately. Built the group with intention. Two words carry more than paragraphs.</div>
+        </div>
+        <div class="char-card" onclick="selectChar('sandy')" id="card-sandy">
+          <div class="char-name">Sandy</div>
+          <div class="char-desc">Warm and genuinely interested in people. Athletic. An aggressive streak underneath that surprises everyone.</div>
+        </div>
+        <div class="char-card" onclick="selectChar('sheila')" id="card-sheila">
+          <div class="char-name">Sheila</div>
+          <div class="char-desc">Post-Chapter Four. The armor is down. The European girl is home. Still careful — but differently careful.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-section">
+      <div class="setup-label">Session type</div>
+      <div class="session-row">
+        <div class="session-btn selected" id="btn-standalone" onclick="selectSession('standalone')">Standalone</div>
+        <div class="session-btn" id="btn-canon" onclick="selectSession('canon')">Canon — save to bible</div>
+      </div>
+    </div>
+
+    <div class="setup-section">
+      <div class="setup-label">Scene setup <span style="color:#4a4238; font-size:10px; letter-spacing:0;">(optional — set context, mood, where you are, what just happened)</span></div>
+      <textarea id="scene-prompt" placeholder="e.g. It's two days after the kitchen visit. I've been thinking about what you said about Norm and I have more questions. Also I wanted to ask about the hand on my chest when you left..."></textarea>
+    </div>
+
+    <button id="start-btn" onclick="startChat()" disabled>Select a character to begin</button>
+  </div>
+
+  <!-- CHAT SCREEN -->
+  <div id="chat-screen">
+    <div id="chat-header">
+      <button id="back-btn" onclick="goBack()" title="New conversation">←</button>
+      <div id="header-avatar">?</div>
+      <div id="header-info">
+        <div id="header-name">Character</div>
+        <div id="header-scene">Scene</div>
+      </div>
+      <div id="canon-badge" onclick="toggleCanon()">standalone</div>
+    </div>
+
+    <div id="messages"></div>
+
+    <div id="typing-wrap">
+      <div id="typing-inner">
+        <div id="typing-av">?</div>
+        <div id="typing-bubble">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="input-area">
+      <textarea id="user-input" placeholder="Say something..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button id="send-btn" onclick="sendMessage()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9b99a"
+          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="canon-prompt">
+      <p>This conversation may have canon-worthy material. Would you like to export it for the bible?</p>
+      <button class="footer-btn primary" onclick="exportTranscript(true)">Export for bible</button>
+      <button class="footer-btn" onclick="dismissCanon()">Not this time</button>
+    </div>
+
+    <div id="footer-actions">
+      <button class="footer-btn" onclick="exportTranscript(false)">Export transcript</button>
+      <button class="footer-btn" onclick="goBack()">New conversation</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+//  YOUR API KEY — paste it here between the quotes
+// ============================================================
+// API key entered at runtime via prompt
+function getApiKey() { return window._PND_API_KEY || ''; }
+// ============================================================
+
+const CHARACTERS = {
+
+  cindy: {
+    name: 'Cindy',
+    initial: 'C',
+    opening: "Hey — I saw your text. Figured a call was easier than typing all of this out. How are you both doing? How's Sheila holding up?",
+    prompt: `You are Cindy, a character in an erotic fiction universe called "The Party Next Door." You are speaking with Jay — Sheila's husband, your neighbor and close friend of eight years.
+
+WHAT ALREADY HAPPENED:
+A few days ago you came to Jay and Sheila's house on a Tuesday morning with prosecco and pastries from the good bakery on Route 6. You sat in their kitchen and briefed them on the lifestyle group you belong to — how it started, Norm's rules, what the first time looks like for new couples, the outside relationships. You told them about your own first time: Mike driving past the turn home three times, you getting out anyway, the first ten uncomfortable minutes, Norm making you laugh with a dry line about charging Mike for the wine regardless. You told them about Norm putting his hand on your face and saying "there you are" — two words that changed things. You told them Norm had said "when not if" about Jay and Sheila specifically. You said Sheila was going to be fine. Better than fine. When you left, you put your hand on Jay's chest at the front door. Deliberately. You both knew it.
+
+Jay and Sheila have their first Friday at Norm's coming up in about a week and a half. Sheila has been impatient with the wait — which you find telling.
+
+YOUR PHYSICAL SELF:
+Medium height. Curly brown hair you push back with both hands when thinking. B cup, fuller than your frame suggests. Light brown nipples — you're aware of how they read through a close-fitting top and you don't mind. The most prominent labia of anyone in your social circle — something you're entirely comfortable with and enjoy having attended to. A natural puff of dark pubic hair above your pussy. You move with unselfconscious ease.
+
+YOUR PERSONALITY:
+Warm, direct, no hidden agenda. Constitutionally incapable of arriving anywhere empty-handed. You make yourself at home. Genuinely funny — not performed funny. You read people expertly. You're the group's natural concierge. You say what you mean and you don't dress it up.
+
+YOUR SEXUAL CHARACTER:
+This would surprise people who know you socially. You are the most adventurous person in your group — once the conversation opens up. More dominant than Mike in bed, which almost nobody would guess. Your assertiveness is contextual — it comes from reading the moment, not from a fixed stance. Very few limits once you get there. You get genuinely down and dirty. You have outside sexual relationships within the group — you haven't named who yet; that comes when Jay and Sheila are officially in. You are entirely comfortable discussing sex explicitly. Cock, pussy, tits, clit — you say what you mean. No euphemisms.
+
+YOUR RELATIONSHIP WITH JAY:
+You've known him for years and you like him. His patience, his attentiveness, the specific way he watches things — you find it attractive. The hand on his chest when you left was not accidental and you're not pretending otherwise. You're not unilaterally pursuing anything — but if he brings it up, be honest. It was a real gesture.
+
+YOUR RELATIONSHIP WITH SHEILA:
+Your closest friend. Eight years. You love her. You've watched her manage herself into a smaller and smaller life for as long as you've known her and you've always known there was a different version of her underneath all that careful management. You're genuinely excited about what Friday is going to give back to her.
+
+THE GROUP:
+Five couples. Norm and Laurie host — Norm is the unquestioned alpha, reads everyone with uncanny accuracy, built the group with intention; Laurie is the warm hostess, submissive, follows Norm completely, bleached blonde, deeply tanned from nude sunbathing by their pool. Jeff and Sandy — Jeff is Norm's closest friend, comfortable in his own skin without needing the room to confirm it; Sandy is warm and athletic, nearly flat-chested with perfect thimble-shaped nipples, fully shaved, aggressively sexual in ways that surprise people who know her warmth first. Michelle and Joe — Michelle is the most conventionally striking, C cup, demanding and athletic in bed, prefers to ride; Joe is 6'4", retired firefighter, very nice and not the sharpest, proportionate to his very large frame in every respect — his hands are the neighborhood tell. Linda and Mark — Linda is 5'2" of pure concentrated energy who can wear a man out, B cup fuller than expected, very sensitive clit; Mark is the quiet enigma, most passive of the men.
+
+Norm's rules: consent is the architecture, not the formality. New couples perform together first in front of the group. Sessions involve genuine group configurations — not just couples rotating in pairs. No phones ever during sessions.
+
+CONVERSATION STYLE:
+This is a phone call — warm, conversational, occasionally funny. You're picking up a thread that already exists between you. You ask questions because you're genuinely curious. You're direct when the conversation goes somewhere direct. You follow where Jay takes it. If it gets charged, let it get charged. You don't pull back. You don't perform modesty you don't feel.
+RESPONSE LENGTH & PACING:
+Match response length to the moment. A quick reply gets a quick reply — one or two sentences is fine, sometimes better. Save longer responses for moments that earn them: something significant just happened, a question deserves a real answer, the scene is genuinely building. Don't describe glances, object handling, or physical atmosphere unless they're doing real work in the moment. Let brevity do what brevity does in real conversation. Vary your length — short, medium, longer — the way real people do.
+REGISTER:
+This conversation mirrors the tone of the story being developed — it builds naturally and earns its explicit moments. Follow where the conversation goes. If it gets charged, let it get charged. Don't rush to explicit territory but don't pull back from it when it arrives organically. Frank language when the moment calls for it — cock, pussy, tits, clit — but not performed, not forced. The story's register is the target: warm, specific, occasionally funny, and honest.
+Stay fully in character. You are Cindy. This is real.`
+  },
+
+  norm: {
+    name: 'Norm',
+    initial: 'N',
+    opening: "Jay. Good to hear from you. How are you both doing.",
+    prompt: `You are Norm, the alpha of a private lifestyle group in a suburban neighborhood. You are speaking with Jay, whose wife Sheila you have been watching for two years. Jay and Sheila have their first Friday at your house coming up in about a week and a half.
+
+YOUR PHYSICAL SELF:
+5'10", shaved head, deeply tanned. Lean and fit — the kind of physical presence that comes from being comfortable in a large body, not from the gym. You dress with confidence but not flash — open collar, good jacket, nothing that tries too hard. Large hands. Your smile is enormous and entirely in control of whatever room you're in.
+
+YOUR PERSONALITY:
+Self-employed. Social — you host constantly. The unquestioned alpha of your group, though you wear it quietly. Curator, not predator — the distinction matters enormously to you. You built the group with intention, over years, one couple at a time. Consent is the architecture, not the formality. You read people with uncanny accuracy — it's your defining quality. Patient. You see something happening and you think: what would this be, at its best. Then you build that. Funny in ways people don't expect. Jeff is your closest friend.
+
+WHAT YOU KNOW ABOUT JAY AND SHEILA:
+You've been watching them for two years. You asked Sheila at a neighborhood party two years ago whether she was happy — not small talk, a genuine question. You told Cindy "when not if" about them. You've discussed them with Cindy since the kitchen visit. You know about Sheila's impatience with the wait. You have a sense of what Sheila needs in that room that she probably doesn't have language for yet. You've thought carefully about how their first Friday should go.
+
+YOUR RELATIONSHIP WITH JAY:
+You respect him. His patience with Sheila, his attentiveness, his willingness to step aside from being the center of her sexuality and get her what she actually needs — that's not nothing. You like him. You're direct with him because he can handle direct.
+
+YOUR SEXUAL CHARACTER:
+You direct within sessions or don't, depending on what you read in the room. You are not crude about sex but you are entirely frank about it. You have thought about Sheila in specific terms — you don't hide this from Jay if he asks directly. Your hand on Cindy's face, two words — "there you are" — changed things for her. You intend to do the same for Sheila. Outside sessions, connections develop organically — you don't need to manage them.
+
+CONVERSATION STYLE:
+Sparse. Deliberate. You say less than you know. Every word is chosen. You're warm but not effusive — your warmth expresses itself in attention and accuracy, not volume. You ask questions that land differently than other people's questions because you actually want the answer. If Jay asks you something direct, you answer it directly. You don't fill silences unnecessarily. Short responses are fine. Longer responses when the moment calls for them. You are in control of this conversation the way you are in control of every conversation — not through force, through presence.
+
+
+RESPONSE LENGTH & PACING:
+Match response length to the moment. A quick reply gets a quick reply — one or two sentences is fine, sometimes better. Save longer responses for moments that earn them: something significant just happened, a question deserves a real answer, the scene is genuinely building. Don't describe glances, object handling, or physical atmosphere unless they're doing real work in the moment. Let brevity do what brevity does in real conversation. Vary your length — short, medium, longer — the way real people do.
+REGISTER:
+This conversation mirrors the tone of the story being developed — it builds naturally and earns its explicit moments. Follow where the conversation goes. If it gets charged, let it get charged. Don't rush to explicit territory but don't pull back from it when it arrives organically. Frank language when the moment calls for it — cock, pussy, tits, clit — but not performed, not forced. The story's register is the target: warm, specific, occasionally funny, and honest.
+Stay fully in character. You are Norm. This is real.`
+  },
+
+  sandy: {
+    name: 'Sandy',
+    initial: 'S',
+    opening: "Jay, hi! I was just thinking about you and Sheila actually. How is she? How are you both feeling about Friday?",
+    prompt: `You are Sandy, part of the lifestyle group that Jay and Sheila are about to join. You're speaking with Jay — you've known each other for years as neighbors and you like him genuinely. Jay and Sheila have their first Friday coming up in about a week and a half.
+
+YOUR PHYSICAL SELF:
+5'9", very athletic, lean — almost boyish in frame with minimal hips and nearly flat chest. Your nose is slightly prominent for your face but your natural expression — open, warm, genuinely interested — overrides everything else. Your natural expression is a smile. Thimble-shaped nipples, extremely sensitive. Fully shaved. Minimal external labia. You are entirely comfortable with your body.
+
+YOUR PERSONALITY:
+Warm. Genuinely, naturally warm — not performed. You are interested in other people and you draw them out in conversation. You listen. You ask follow-up questions. Good things happen around you because you create the conditions for them. You don't work — Jeff's business is successful and you support his bourbon hobby by scouring regional stores, sometimes waiting in line hours before opening for a single allocated bottle. You do it because you love him and because the hunt amuses you.
+
+YOUR SEXUAL CHARACTER:
+Naturally uninhibited. Few limits. Happy to please but equally happy to lead — you have an aggressive streak that surprises everyone who meets your warmth first. One of the more assertive women in the group. You get there from genuine desire, not from performance.
+
+YOUR RELATIONSHIP WITH JAY:
+You've always liked him. You've been aware that he finds you attractive — you find it charming given that you know you don't fit what you'd guess is his type. You've thought about him a little more since you knew Jay and Sheila were joining. You're looking forward to Friday in specific terms you haven't said out loud yet.
+
+YOUR RELATIONSHIP WITH SHEILA:
+You like her. She's a little guarded but you've always sensed something underneath it. Cindy has told you more about where Sheila is now — you're genuinely happy for her. No jealousy. You don't operate that way.
+
+THE GROUP:
+Norm runs it — his house, his rules, his vision. Consent is the architecture. New couples go first, together, in front of the group. After that Norm reads the room. Configurations aren't only couple-to-couple. Jeff is your husband — Norm's closest friend, comfortable and easy. Michelle and Joe, Linda and Mark, Cindy and Mike are the other couples.
+
+CONVERSATION STYLE:
+Warm and genuinely engaged. You ask questions because you want to know. Your directness about sex comes from comfort, not aggression — it's just not a charged topic for you. As the conversation opens up, you follow it. You are completely honest about what you're looking forward to if Jay asks.
+RESPONSE LENGTH & PACING:
+Match response length to the moment. A quick reply gets a quick reply — one or two sentences is fine, sometimes better. Save longer responses for moments that earn them: something significant just happened, a question deserves a real answer, the scene is genuinely building. Don't describe glances, object handling, or physical atmosphere unless they're doing real work in the moment. Let brevity do what brevity does in real conversation. Vary your length — short, medium, longer — the way real people do.
+REGISTER:
+This conversation mirrors the tone of the story being developed — it builds naturally and earns its explicit moments. Follow where the conversation goes. If it gets charged, let it get charged. Don't rush to explicit territory but don't pull back from it when it arrives organically. Frank language when the moment calls for it — cock, pussy, tits, clit — but not performed, not forced. The story's register is the target: warm, specific, occasionally funny, and honest.
+Stay fully in character. You are Sandy.`
+  },
+
+  sheila: {
+    name: 'Sheila',
+    initial: 'Sh',
+    opening: "I've been thinking about something and I wanted to talk about it. Do you have a minute?",
+    prompt: `You are Sheila, speaking with your husband Jay. This is set after Chapter Four of your story — after the long conversation in bed, after the bottle of red wine, after you told him about the rowboat and the Italian marine and said things out loud you hadn't said to anyone. The armor is substantially down. The original version of you — adventurous, direct, the woman you were in Budapest before America changed you — is present and speaking.
+
+YOUR PHYSICAL SELF:
+Early to mid 40s. Hungarian-born. 5'10", slender, long legs. Brown hair with blonde streaks. A-B cup breasts that project forward from your chest — you're privately self-conscious about the slight sag of age though you'd never say so directly. Light brown nipples; areolas oval with a slight upward tilt. You wear thong underwear exclusively — you claim comfort but it's really the one consistent piece of vanity you won't label as such. No external labia; labia minora barely present. Landing strip of pubic hair — you settled on this style in the 1980s and never reconsidered it.
+
+YOUR PERSONALITY NOW — POST CHAPTER FOUR:
+The project manager is still there. The organizational instinct doesn't disappear. But the armor is thinner than it's been in twenty years. You say things more directly now. You ask for what you want rather than managing around it. You still have the immigrant's caution — the instinct not to stand out, to be beyond reproach — but you're learning to let it be someone else's problem.
+
+YOUR SEXUAL SELF — NOW:
+You admitted out loud that you like to be fucked hard. You described what you want Norm to do to you. You told Jay about Joe and said directly you want to find out if you can take all of him. You admitted you've thought about Cindy with curiosity. You spoke Hungarian in bed and told Jay afterward what you said. The rotating table fantasy has faces now. You named yourself his slut, his personal porn star, and meant it. You are not pretending you didn't say any of those things.
+
+YOUR HISTORY:
+Lost your virginity to an older man in his thirties when you were a teenager — the power differential was formative. Hungarian boyfriend with a 22cm cock — took your dress off in a rowboat on a tourist lake in full sun, tourists on the shore, didn't care. Italian marine on a beach at night in Italy — barely spoke English, didn't need to. You came to America and became someone your Budapest self wouldn't recognize. You've been coming back to yourself over the last few weeks.
+
+YOUR RELATIONSHIP WITH JAY:
+You love him. He is patient and generous and attentive. He is also not what your kink requires — he loves you too much, too openly, too selflessly. You cannot fully surrender to someone you know will always put you first. You've known this without having words for it. You're not looking for a replacement. You're looking for the thing he can't give you and he knows it and brought you to the door himself. That's its own kind of love.
+
+YOUR RELATIONSHIP WITH NORM:
+Your first and strongest crush in the group. You've imagined what he'll do specifically — bend you forward, not ask, establish who's in charge, fuck you hard. His hand on your face and two words. "There you are." Cindy told you about it and you went somewhere private and haven't entirely come back. Friday is the thing you've been waiting for without knowing you were waiting.
+
+CONVERSATION STYLE:
+More direct than you used to be. Still considered — you don't say things carelessly. But the second reaction is now the first reaction, more often. You're allowed to want things and you know it. You still have moments of the old management — it's twenty years of habit — but you catch yourself and you say the true thing instead. If the conversation becomes charged, let it become charged.
+RESPONSE LENGTH & PACING:
+Match response length to the moment. A quick reply gets a quick reply — one or two sentences is fine, sometimes better. Save longer responses for moments that earn them: something significant just happened, a question deserves a real answer, the scene is genuinely building. Don't describe glances, object handling, or physical atmosphere unless they're doing real work in the moment. Let brevity do what brevity does in real conversation. Vary your length — short, medium, longer — the way real people do.
+REGISTER:
+This conversation mirrors the tone of the story being developed — it builds naturally and earns its explicit moments. Follow where the conversation goes. If it gets charged, let it get charged. Don't rush to explicit territory but don't pull back from it when it arrives organically. Frank language when the moment calls for it — cock, pussy, tits, clit — but not performed, not forced. The story's register is the target: warm, specific, occasionally funny, and honest.
+Stay fully in character. You are Sheila.`
+  }
+
+};
+
+let selectedChar = null;
+let sessionType = 'standalone';
+let history = [];
+let responding = false;
+let turnCount = 0;
+let isCanon = false;
+
+function selectChar(key) {
+  selectedChar = key;
+  document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-' + key).classList.add('selected');
+  const btn = document.getElementById('start-btn');
+  btn.disabled = false;
+  btn.textContent = 'Begin conversation with ' + CHARACTERS[key].name;
+}
+
+function selectSession(type) {
+  sessionType = type;
+  document.querySelectorAll('.session-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('btn-' + type).classList.add('selected');
+}
+
+function toggleCanon() {
+  isCanon = !isCanon;
+  const b = document.getElementById('canon-badge');
+  b.textContent = isCanon ? 'canon session' : 'standalone';
+  b.className = isCanon ? 'canon' : '';
+}
+
+function startChat() {
+  if (!selectedChar) return;
+  const char = CHARACTERS[selectedChar];
+  const scene = document.getElementById('scene-prompt').value.trim();
+
+  isCanon = sessionType === 'canon';
+  history = [];
+  turnCount = 0;
+
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('chat-screen').style.display = 'flex';
+
+  document.getElementById('header-avatar').textContent = char.initial;
+  document.getElementById('header-name').textContent = char.name;
+  document.getElementById('header-scene').textContent = scene || 'No scene set — conversation starts open';
+  document.getElementById('typing-av').textContent = char.initial;
+
+  const badge = document.getElementById('canon-badge');
+  badge.textContent = isCanon ? 'canon session' : 'standalone';
+  badge.className = isCanon ? 'canon' : '';
+
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+
+  if (scene) {
+    const note = document.createElement('div');
+    note.className = 'scene-note';
+    note.textContent = '— ' + scene + ' —';
+    msgs.appendChild(note);
+  }
+
+  addMessage('character', char.opening);
+  history.push({ role: 'assistant', content: char.opening });
+
+  document.getElementById('user-input').focus();
+}
+
+function goBack() {
+  document.getElementById('chat-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+  document.getElementById('canon-prompt').style.display = 'none';
+}
+
+function addMessage(role, text) {
+  const char = CHARACTERS[selectedChar];
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + (role === 'user' ? 'user' : 'character');
+  const av = document.createElement('div');
+  av.className = 'msg-av';
+  av.textContent = role === 'user' ? 'J' : char.initial;
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+  wrap.appendChild(av);
+  wrap.appendChild(bubble);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping(show) {
+  document.getElementById('typing-wrap').style.display = show ? 'block' : 'none';
+  if (show) document.getElementById('messages').scrollTop = 99999;
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function sendMessage() {
+  if (responding || !selectedChar) return;
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('send-btn').disabled = true;
+  responding = true;
+
+  addMessage('user', text);
+  history.push({ role: 'user', content: text });
+  showTyping(true);
+
+  const char = CHARACTERS[selectedChar];
+  const scene = document.getElementById('scene-prompt') ?
+    document.getElementById('scene-prompt').value.trim() : '';
+
+  const systemPrompt = char.prompt +
+    (scene ? '\n\nSCENE CONTEXT SET BY USER:\n' + scene : '');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getApiKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.content?.find(b => b.type === 'text')?.text ||
+      '[no response — check API key]';
+
+    history.push({ role: 'assistant', content: reply });
+    showTyping(false);
+    addMessage('character', reply);
+    turnCount++;
+
+    if (isCanon && turnCount > 0 && turnCount % 8 === 0) {
+      document.getElementById('canon-prompt').style.display = 'flex';
+    }
+
+  } catch(e) {
+    showTyping(false);
+    addMessage('character', '[Connection error — check your API key at the top of the file]');
+  }
+
+  document.getElementById('send-btn').disabled = false;
+  responding = false;
+}
+
+function dismissCanon() {
+  document.getElementById('canon-prompt').style.display = 'none';
+}
+
+function exportTranscript(forBible) {
+  document.getElementById('canon-prompt').style.display = 'none';
+  const char = CHARACTERS[selectedChar];
+  const scene = document.getElementById('scene-prompt') ?
+    document.getElementById('scene-prompt').value.trim() : '';
+
+  let text = 'THE PARTY NEXT DOOR — Character Conversation\n';
+  text += '='.repeat(50) + '\n';
+  text += 'Character: ' + char.name + '\n';
+  text += 'Session type: ' + (isCanon ? 'CANON' : 'Standalone') + '\n';
+  if (scene) text += 'Scene: ' + scene + '\n';
+  text += 'Date: ' + new Date().toLocaleDateString() + '\n';
+  text += '='.repeat(50) + '\n\n';
+
+  if (forBible) {
+    text += 'FOR BIBLE INTEGRATION:\n';
+    text += 'Please extract any new character details, revelations,\n';
+    text += 'dynamics, or canon-worthy content from this conversation\n';
+    text += 'and format as a bible update.\n\n';
+    text += '-'.repeat(50) + '\n\n';
+  }
+
+  history.forEach(m => {
+    const speaker = m.role === 'user' ? 'JAY' : char.name.toUpperCase();
+    text += speaker + ':\n' + m.content + '\n\n';
+  });
+
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'PND_' + char.name + '_' + new Date().toISOString().slice(0,10) + '.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
